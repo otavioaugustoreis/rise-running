@@ -37,12 +37,13 @@ namespace RiseRunning_ScannerCode.Controllers
                 Cpf = ValidateCPF.cpfToLong(cpf)
             };
 
-            runners.Enqueue(runner);
+            runners!.Enqueue(runner);
 
             _memoryCache.Set(CacheKey, runners, TimeSpan.FromMinutes(30));
 
             return Ok(MessageCommons.RunnerRegistrado(runner.Nome));
         }
+
 
         [HttpGet]
         public ActionResult<List<RunnerEntity>> GetAllRunner() 
