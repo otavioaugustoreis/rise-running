@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using RiseRunning_ScannerCode.Model.Commons;
 using RiseRunning_ScannerCode.Model.Entity;
+using RiseRunning_ScannerCode.Model.Repository;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -10,8 +12,9 @@ namespace RiseRunning_ScannerCode.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class RunnersController(IMemoryCache memoryCache) : ControllerBase
-    {   
+    public class RunnersController(IMemoryCache memoryCache, AppDbContext appDbContext) : ControllerBase
+    {
+        private readonly AppDbContext _appDbContext = appDbContext;
         private readonly IMemoryCache _memoryCache = memoryCache;
         private const string CacheKey = "RunnersQueue";
 
@@ -21,16 +24,14 @@ namespace RiseRunning_ScannerCode.Controllers
             if (!ValidateCPF.IsCpf(cpf)) 
                      Ok(MessageCommons.RunnerCpf);
 
-            if (!_memoryCache.TryGetValue(CacheKey, out ConcurrentQueue<RunnerEntity> runners))
-            {
-                runners = new ConcurrentQueue<RunnerEntity>();
-            }
-
-            if (runners!.Any(r => r.Cpf == ValidateCPF.cpfToLong(cpf)))
-            {
-                var existente = runners.First(r => r.Cpf == ValidateCPF.cpfToLong(cpf));
+            var cpfLong = ValidateCPF.cpfToLong(cpf);
+            
+            var existente = await _appDbContext
+                .Runners
+                .FirstOrDefaultAsync(r => r.Cpf == cpfLong);
+            
+            if (existente != null)
                 return Ok(MessageCommons.RunnerJaRegistrado(existente.Nome));
-            }
 
             var runner = new RunnerEntity
             {
@@ -38,26 +39,30 @@ namespace RiseRunning_ScannerCode.Controllers
                 Cpf = ValidateCPF.cpfToLong(cpf)
             };
 
-            runners!.Enqueue(runner);
+            appDbContext.AddRunner(runner);
 
-            _memoryCache.Set(CacheKey, runners, TimeSpan.FromMinutes(30));
+            if (!_memoryCache.TryGetValue(CacheKey, out List<RunnerEntity> cacheRunners))
+                cacheRunners = new List<RunnerEntity>();
 
+            cacheRunners.Add(runner);
+
+            _memoryCache.Set(CacheKey, cacheRunners, TimeSpan.FromMinutes(30));
             return Ok(MessageCommons.RunnerRegistrado(runner.Nome));
         }
 
         [HttpGet]
-        public ActionResult<List<RunnerEntity>> GetAllRunner() 
+        public async Task<ActionResult<List<RunnerEntity>>> GetAllRunner() 
         {
-            if (_memoryCache.TryGetValue(CacheKey, out ConcurrentQueue<RunnerEntity> runners))
+            if (_memoryCache.TryGetValue(CacheKey, out List<RunnerEntity> runners))
             {
                 return runners!
                     .OrderByDescending(p => p.DataHora)
                     .ToList();
             }
 
-            return runners
+            return await _appDbContext.Runners
                 .OrderByDescending(p => p.DataHora)
-                .ToList();
+                .ToListAsync();
         }
     }
 }
