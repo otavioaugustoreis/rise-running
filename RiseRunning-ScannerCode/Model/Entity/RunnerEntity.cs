@@ -1,6 +1,6 @@
 ﻿namespace RiseRunning_ScannerCode.Model.Entity
 {
-    public record RunnerDTO(string Nome, long Cpf, DateTime DataHora);
+    public record RunnerDTO(string Nome, string Email, DateTime DataHora);
 
     public class RunnerEntity
     {
@@ -8,7 +8,7 @@
 
         public string Nome { get; set; } = string.Empty;
 
-        public long Cpf { get; set; }
+        public string  Email { get; set; } = string.Empty ;
 
         public DateTime DataHora { get; set; } = DateTime.UtcNow;
     }

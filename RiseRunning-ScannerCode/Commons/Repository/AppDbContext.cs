@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using RiseRunning_ScannerCode.Model.Entity;
 
-namespace RiseRunning_ScannerCode.Model.Repository
+namespace RiseRunning_ScannerCode.Commons.Repository
 {
     public class AppDbContext : DbContext
     {

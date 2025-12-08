@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using RiseRunning_ScannerCode.Model.Repository;
+using RiseRunning_ScannerCode.Commons.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +11,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
