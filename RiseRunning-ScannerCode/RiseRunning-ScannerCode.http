@@ -1,4 +1,4 @@
-@RiseRunning_ScannerCode_HostAddress = http://localhost:5150
+@RiseRunning_ScannerCode_HostAddress = http://localhost:5156
 
 GET {{RiseRunning_ScannerCode_HostAddress}}/weatherforecast/
 Accept: application/json

@@ -15,7 +15,9 @@ namespace RiseRunning_ScannerCode.Controllers
         private readonly ICacheService _cacheService = cacheService;
 
         [HttpPost]
-        public async Task<IActionResult> PostRunner([FromHeader] string nome, [FromHeader] string email)
+        public async Task<IActionResult> PostRunner(
+            [FromRoute] string nome,
+            [FromRoute] string email)
         {
             if (!ValidateEmail.IsValidEmail(email)) 
                      Ok(MessageCommons.RunnerCpf);
